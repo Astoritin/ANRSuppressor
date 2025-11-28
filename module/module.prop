@@ -1,0 +1,6 @@
+id=anrstretcher
+name=ANR Stretcher
+version=v1.0
+versionCode=1
+author=Astoritin
+description=Prevents those "App isn't responding" pop-ups on Android 12+ when your app is actually working fine in the background.
