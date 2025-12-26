@@ -1,2 +1,2 @@
-# ANR Stretcher
-Prevents those "App isn't responding" pop-ups on Android 12+ when your app is actually working fine in the background.
+# ANR Suppressor
+A Magisk module to resolve the issue in Android 12 and later versions where the system excessively displays "App isn't responding" pop-ups / 一个用于解决 Android 12 及更高版本中，系统过于激进地在前台显示“应用未响应”弹窗问题的 Magisk 模块

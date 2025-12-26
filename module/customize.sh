@@ -4,84 +4,8 @@ SKIPUNZIP=1
 MOD_PROP="${TMPDIR}/module.prop"
 MOD_NAME="$(grep_prop name "$MOD_PROP")"
 MOD_VER="$(grep_prop version "$MOD_PROP") ($(grep_prop versionCode "$MOD_PROP"))"
-MOD_SYSTEM_PROP="${MODPATH}/system.prop"
 
-show_system_info() {
-
-    ui_print "- Device: $(getprop ro.product.brand) $(getprop ro.product.model) ($(getprop ro.product.device))"
-    ui_print "- OS: Android $(getprop ro.build.version.release) (API $(getprop ro.build.version.sdk)), $(getprop ro.product.cpu.abi | cut -d '-' -f1)"
-    ui_print "- Kernel: $(uname -r)"
-
-}
-
-is_magisk() {
-
-    if ! command -v magisk >/dev/null 2>&1; then
-        return 1
-    fi
-
-    MAGISK_V_VER_NAME="$(magisk -v)"
-    MAGISK_V_VER_CODE="$(magisk -V)"
-    case "$MAGISK_V_VER_NAME" in
-        *"-alpha"*) MAGISK_BRANCH_NAME="Alpha" ;;
-        *"-lite"*)  MAGISK_BRANCH_NAME="Magisk Lite" ;;
-        *"-kitsune"*) MAGISK_BRANCH_NAME="Kitsune Mask" ;;
-        *"-delta"*) MAGISK_BRANCH_NAME="Magisk Delta" ;;
-        *) MAGISK_BRANCH_NAME="Magisk" ;;
-    esac
-    DETECT_MAGISK="true"
-    return 0
-
-}
-
-is_kernelsu() {
-    if [ -n "$KSU" ]; then
-        DETECT_KSU="true"
-        ROOT_SOL="KernelSU"
-        return 0
-    fi
-    return 1
-}
-
-is_apatch() {
-    if [ -n "$APATCH" ]; then
-        DETECT_APATCH="true"
-        ROOT_SOL="APatch"
-        return 0
-    fi
-    return 1
-}
-
-install_env_check() {
-
-    MAGISK_BRANCH_NAME="Official"
-    ROOT_SOL="Magisk"
-    ROOT_SOL_COUNT=0
-
-    is_kernelsu && ROOT_SOL_COUNT=$((ROOT_SOL_COUNT + 1))
-    is_apatch && ROOT_SOL_COUNT=$((ROOT_SOL_COUNT + 1))
-    is_magisk && ROOT_SOL_COUNT=$((ROOT_SOL_COUNT + 1))
-
-    if [ "$DETECT_KSU" = "true" ]; then
-        ROOT_SOL="KernelSU"
-        ROOT_SOL_DETAIL="KernelSU (kernel:$KSU_KERNEL_VER_CODE, ksud:$KSU_VER_CODE)"
-    elif [ "$DETECT_APATCH" = "true" ]; then
-        ROOT_SOL="APatch"
-        ROOT_SOL_DETAIL="APatch ($APATCH_VER_CODE)"
-    elif [ "$DETECT_MAGISK" = "true" ]; then
-        ROOT_SOL="Magisk"
-        ROOT_SOL_DETAIL="$MAGISK_BRANCH_NAME (${MAGISK_VER_CODE:-$MAGISK_V_VER_CODE})"
-    fi
-
-    if [ "$ROOT_SOL_COUNT" -gt 1 ]; then
-        ROOT_SOL="Multiple"
-        ROOT_SOL_DETAIL="Multiple"
-    elif [ "$ROOT_SOL_COUNT" -lt 1 ]; then
-        ROOT_SOL="Unknown"
-        ROOT_SOL_DETAIL="Unknown"
-    fi
-
-}
+MOD_SYS_PROP="${MODPATH}/system.prop"
 
 extract() {
     file=$1
@@ -116,22 +40,18 @@ extract() {
 }
 
 extract "customize.sh" "$TMPDIR"
+extract "module.prop"
 ui_print "- Setting up $MOD_NAME"
 ui_print "- Version: $MOD_VER"
-show_system_info
-install_env_check
-ui_print "- Installing from $ROOT_SOL app"
-ui_print "- Root: $ROOT_SOL_DETAIL"
-
 if ! grep -q ro.hw_timeout_multiplier /system/lib*/libinputflinger.so; then
     ui_print "! ANR timeout cannot be changed"
-    ui_print "! This feature is missing in your system's framework"
-    abort "! Your ROM does not support this modification"
+    ui_print "! In your device's system framework"
+    ui_print "! this feature is missing"
+    abort "! $MOD_NAME is not supported!"
 fi
-
-extract "module.prop"
-echo "ro.hw_timeout_multiplier=4" > "$MODPATH/system.prop"
-ui_print "- ANR timeout has been changed into 20s"
-ui_print "- Setting permission"
+echo "ro.hw_timeout_multiplier=4" > "$MOD_SYS_PROP"
+ui_print "- ANR timeout has been set to 20s"
+ui_print "- Reboot to take effect"
+ui_print "- Setting permissions"
 set_perm_recursive "$MODPATH" 0 0 0755 0644
-ui_print "- Welcome to use $MOD_NAME!"
+ui_print "- Welcome to $MOD_NAME!"
