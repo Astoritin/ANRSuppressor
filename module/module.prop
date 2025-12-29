@@ -3,5 +3,5 @@ name=ANR Suppressor
 version=1.0
 versionCode=1
 author=Astoritin
-description=Resolve the issue in Android 12 and later versions where the system excessively displays "App isn't responding" pop-ups.
+description=Prevent system from excessively displaying "App isn't responding" pop-ups in Android 12+.
 updateJson=https://raw.githubusercontent.com/Astoritin/ANRSuppressor/main/upgrade/update.json
